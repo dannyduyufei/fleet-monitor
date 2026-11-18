@@ -1,12 +1,10 @@
 # fleet-monitor
 
-Real-time health and telemetry for a small robot fleet: simulated robots publish over MQTT, and a FastAPI service tracks the latest state and flags problems.
-
-Personal learning project.
+I built this to try out ideas for monitoring a mixed fleet of field devices over MQTT. The questions I kept running into in deployment work were how to spot a device that has gone silent, how to notice a low battery, whether an alert is still trustworthy when packets arrive twice or out of order, and what ingest looks like when a burst of messages arrives. This repo is a personal sandbox: simulated robots publish telemetry, and a FastAPI service keeps the latest state and flags offline, low-battery, and stuck-task conditions. It is not used at work or in production.
 
 ## Problem
 
-Someone watching several robots needs one place to see which robot is online, what its battery and task look like, and when something needs a person. Robots go quiet. Packets show up twice, or an older packet shows up after a newer one. An alert that fires twice for the same fact, or that a late packet can clear, is not trustworthy.
+A watcher of several devices needs one place to see which one is online, what its battery and task look like, and when something needs a person. Devices go quiet. Packets show up twice, or an older packet shows up after a newer one. An alert that fires twice for the same fact, or that a late packet can clear, is not trustworthy.
 
 ## Architecture
 
@@ -116,7 +114,7 @@ Messages published while the socket is down are dropped. QoS 0 telemetry is repu
 
 I would not run two API processes on this file. A second writer is the point where I would move the rows to a server database. Until then Postgres would be another container and no new capability.
 
-**The broker allows anonymous clients.** Compose has no password to leak and nothing to provision. That is only reasonable on a machine you control. On a shared network I would turn on users and TLS. There is no application auth on the API for the same reason: this binds to localhost for a demo.
+**The broker allows anonymous clients, and the API has no application auth.** With compose, the API listens on `0.0.0.0:8000` and Mosquitto is published on port 1883, so this is for local or lab use only — not a shared or public network. Compose has no password to leak and nothing to provision, which is only reasonable in that setting. On a shared network I would turn on broker users and TLS, and put auth on the API.
 
 ## Tests
 
@@ -162,4 +160,4 @@ MIT
 
 ## Disclaimer
 
-Personal learning project built in my own time. Not work product of any employer; uses no employer code or customer data; simulated robots only.
+Built on my own time, independent of any employer. Not work product of any employer; uses no employer code or customer data; simulated robots only. Not used or deployed at work or in production.
